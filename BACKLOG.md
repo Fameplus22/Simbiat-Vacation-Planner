@@ -4,7 +4,7 @@
 
 - Add true localization files and translated copy for supported languages.
 - Add live currency conversion through a server-side provider.
-- Add itinerary day-by-day schedule builder for each city.
+- Add editable day notes, activity blocks, and transit placeholders on itinerary days.
 - Add trip status lifecycle beyond `draft`.
 - Add real-time trip collaboration and invite permissions.
 - Add invite/collaboration design after access-control rules are specified.

@@ -2,7 +2,7 @@
 
 ## Environment
 
-- Current Lane B branch: `feature/lane-b-editable-trips`
+- Current Lane B branch: `feature/lane-b-itinerary-foundation`
 - Baseline Phase 1 branch: `feature/bootstrap-foundation`
 - Reply-Code: `VP-9CKCBP4Q7F`
 - Supabase env names present locally: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
@@ -59,3 +59,12 @@ Remote delivery is blocked: `git push -u origin feature/bootstrap-foundation` fa
 - Signed-out protected edit redirect: PASS. `/trips/not-a-real-id/edit` redirects to `/auth/sign-in?next=%2Ftrips%2Fnot-a-real-id%2Fedit`; screenshot captured at `output/playwright/lane-b-edit-redirect.png`.
 - Favicon route: PASS. `GET /favicon.svg` returns `200 OK` with `image/svg+xml`.
 - Browser console sanity: PASS after favicon metadata/file addition. Fresh landing load had no app error; dev-only React/HMR messages are expected.
+
+## Lane B Itinerary Foundation Verification
+
+- `npm run lint`: PASS after itinerary changes.
+- `npm run typecheck`: PASS after itinerary changes.
+- `npm run build`: PASS after itinerary changes. Build includes `/trips/[id]/itinerary`.
+- Protected itinerary route `/trips/[id]/itinerary` compiles and calls `requireUser()`: PASS by typecheck.
+- Itinerary generation action: RPC call compiles; live database UAT pending application of `20260507030000_itinerary_foundation.sql`.
+- Signed-out protected itinerary redirect: PASS. `/trips/not-a-real-id/itinerary` redirects to `/auth/sign-in?next=%2Ftrips%2Fnot-a-real-id%2Fitinerary`.

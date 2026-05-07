@@ -30,3 +30,11 @@
 - Added edit CTA and update success state on trip detail pages.
 - Added favicon metadata and asset to remove the browser favicon 404.
 - Updated Lane B docs, backlog, UAT notes, and release trail.
+
+## Lane B Itinerary Foundation
+
+- Added protected itinerary page at `/trips/[id]/itinerary`.
+- Added `trip_days` schema, indexes, RLS policies, and grants.
+- Added `public.regenerate_trip_days(...)` RPC to generate day rows from city allocation while preserving existing day detail fields.
+- Added itinerary CTA to trip detail pages.
+- Updated setup, backlog, blocker, and UAT artifacts for the new itinerary migration.

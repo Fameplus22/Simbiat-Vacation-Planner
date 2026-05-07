@@ -3,6 +3,7 @@ import {
   CalendarDays,
   Globe2,
   Landmark,
+  ListChecks,
   Pencil,
   Users,
 } from "lucide-react";
@@ -65,12 +66,20 @@ export default async function TripDetailPage({
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             {trip ? (
-              <Button asChild variant="outline">
-                <Link href={`/trips/${trip.id}/edit`}>
-                  <Pencil className="h-4 w-4" />
-                  Edit draft
-                </Link>
-              </Button>
+              <>
+                <Button asChild variant="outline">
+                  <Link href={`/trips/${trip.id}/itinerary`}>
+                    <ListChecks className="h-4 w-4" />
+                    Itinerary
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href={`/trips/${trip.id}/edit`}>
+                    <Pencil className="h-4 w-4" />
+                    Edit draft
+                  </Link>
+                </Button>
+              </>
             ) : null}
             <Button asChild>
               <Link href="/trips/new">Plan another trip</Link>
