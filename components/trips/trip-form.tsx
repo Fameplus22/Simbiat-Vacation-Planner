@@ -1,0 +1,210 @@
+"use client";
+
+import { Loader2, Plus, Save, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useActionState, useMemo, useState } from "react";
+
+import { createTripDraftAction } from "@/app/trips/new/actions";
+import { idleActionState } from "@/lib/action-state";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+type CityDraft = {
+  id: string;
+  cityName: string;
+  days: number;
+};
+
+function createCityDraft(index: number): CityDraft {
+  return {
+    id: `city-${index}`,
+    cityName: "",
+    days: 1,
+  };
+}
+
+export function TripForm() {
+  const [state, formAction, isPending] = useActionState(
+    createTripDraftAction,
+    idleActionState,
+  );
+  const [cities, setCities] = useState<CityDraft[]>([createCityDraft(0)]);
+  const [totalDays, setTotalDays] = useState(1);
+
+  const allocatedDays = useMemo(
+    () => cities.reduce((sum, city) => sum + Number(city.days || 0), 0),
+    [cities],
+  );
+  const allocationMatches = allocatedDays === totalDays;
+
+  return (
+    <form action={formAction} className="space-y-8" noValidate>
+      <div className="grid gap-5 md:grid-cols-[1fr_180px]">
+        <div className="space-y-2">
+          <Label htmlFor="country_name">Destination country</Label>
+          <Input
+            id="country_name"
+            name="country_name"
+            placeholder="Portugal"
+            aria-describedby={
+              state.fieldErrors?.country_name ? "country-error" : undefined
+            }
+            required
+          />
+          {state.fieldErrors?.country_name ? (
+            <p className="text-sm font-medium text-destructive" id="country-error">
+              {state.fieldErrors.country_name}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="total_days">Total days</Label>
+          <Input
+            id="total_days"
+            min={1}
+            max={365}
+            name="total_days"
+            onChange={(event) => setTotalDays(Number(event.target.value || 0))}
+            type="number"
+            value={totalDays}
+            required
+          />
+          {state.fieldErrors?.total_days ? (
+            <p className="text-sm font-medium text-destructive">
+              {state.fieldErrors.total_days}
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      <section className="space-y-4" aria-labelledby="cities-heading">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold" id="cities-heading">
+              Cities and day allocation
+            </h2>
+            <p className="text-sm leading-6 text-muted-foreground">
+              Add each city and make the allocated days match the trip length.
+            </p>
+          </div>
+          <Button
+            onClick={() =>
+              setCities((current) => [
+                ...current,
+                {
+                  ...createCityDraft(current.length),
+                  id: `city-${Date.now()}-${current.length}`,
+                },
+              ])
+            }
+            type="button"
+            variant="outline"
+          >
+            <Plus className="h-4 w-4" />
+            Add city
+          </Button>
+        </div>
+
+        <div className="space-y-3">
+          {cities.map((city, index) => (
+            <div
+              className="grid gap-3 rounded-lg border border-border bg-background p-3 sm:grid-cols-[1fr_140px_44px]"
+              key={city.id}
+            >
+              <div className="space-y-2">
+                <Label htmlFor={`${city.id}-name`}>City {index + 1}</Label>
+                <Input
+                  id={`${city.id}-name`}
+                  name="city_name"
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setCities((current) =>
+                      current.map((item) =>
+                        item.id === city.id ? { ...item, cityName: value } : item,
+                      ),
+                    );
+                  }}
+                  placeholder="Lisbon"
+                  value={city.cityName}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor={`${city.id}-days`}>Days</Label>
+                <Input
+                  id={`${city.id}-days`}
+                  min={1}
+                  name="days_in_city"
+                  onChange={(event) => {
+                    const value = Number(event.target.value || 0);
+                    setCities((current) =>
+                      current.map((item) =>
+                        item.id === city.id ? { ...item, days: value } : item,
+                      ),
+                    );
+                  }}
+                  type="number"
+                  value={city.days}
+                  required
+                />
+              </div>
+
+              <Button
+                aria-label={`Remove city ${index + 1}`}
+                className="self-end"
+                disabled={cities.length === 1}
+                onClick={() =>
+                  setCities((current) => current.filter((item) => item.id !== city.id))
+                }
+                type="button"
+                variant="ghost"
+                size="icon"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+
+        <div
+          className={
+            allocationMatches
+              ? "rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800"
+              : "rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900"
+          }
+          role="status"
+        >
+          Allocated {allocatedDays} of {totalDays} total days.
+        </div>
+
+        {state.fieldErrors?.city_name || state.fieldErrors?.days_in_city ? (
+          <p className="text-sm font-medium text-destructive">
+            {state.fieldErrors.city_name ?? state.fieldErrors.days_in_city}
+          </p>
+        ) : null}
+      </section>
+
+      {state.message ? (
+        <p
+          className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive"
+          role="alert"
+        >
+          {state.message}
+        </p>
+      ) : null}
+
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+        <Button asChild variant="outline">
+          <Link href="/dashboard">Cancel</Link>
+        </Button>
+        <Button disabled={isPending} type="submit">
+          {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          Save draft trip
+        </Button>
+      </div>
+    </form>
+  );
+}

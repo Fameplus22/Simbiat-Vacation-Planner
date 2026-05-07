@@ -1,0 +1,25 @@
+# Bugs
+
+## Open
+
+- Severity: Medium
+  - Issue: `npm audit` reports two moderate findings through Next's bundled PostCSS dependency. npm suggests a bad semver-major downgrade to Next 9.3.3, so no automated fix was applied.
+  - Next step: Monitor/update Next when an upstream patched version is available for the current major line.
+
+- Severity: Medium
+  - Issue: Live trip-save UAT depends on the Supabase migration being applied to the project database.
+  - Next step: Apply `supabase/migrations/20260507000000_bootstrap_foundation.sql`, then retest sign-in, draft save, and dashboard retrieval.
+
+- Severity: Medium
+  - Issue: Supabase email confirmation blocks signed-in browser UAT for generated test accounts.
+  - Next step: Confirm the generated test account email or provide an already confirmed test account, then rerun signed-in persistence, sign-out, draft-save, and dashboard-list UAT.
+
+- Severity: High
+  - Issue: Remote push is blocked by GitHub 403 because local Git credentials belong to `Fameplus22`, which cannot push to this repo.
+  - Next step: Authenticate as a GitHub account with write access or grant `Fameplus22` write access, then rerun `git push -u origin feature/bootstrap-foundation`.
+
+## Closed
+
+- Severity: High
+  - Issue: The starter repo referenced `@/lib/supabase/proxy` but did not contain that file.
+  - Resolution: Added the Supabase Proxy helper and supporting server/browser clients.
