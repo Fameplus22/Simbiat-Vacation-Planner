@@ -13,3 +13,11 @@
 - Added backlog, bugs, impediments, UAT, release notes, and bootstrap docs.
 - Added project email blocker reply code `VP-9CKCBP4Q7F`.
 - Updated local dev/build scripts to use Next's Webpack path for this machine's SWC WASM fallback.
+
+## Lane B Global Planning Foundation
+
+- Added planning language and currency constants.
+- Extended trip creation with dates, travelers, budget, currency, language, and notes.
+- Added protected trip detail page at `/trips/[id]`.
+- Added second Supabase migration for global planning fields.
+- Added Lane A live-launch and Lane B global-product docs.

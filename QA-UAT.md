@@ -35,3 +35,12 @@
 Live trip-save UAT requires a confirmed Supabase user and the database migration applied to the target project. The blocker is tracked in `IMPEDIMENTS.md` and `IMPEDIMENT_EMAIL_DRAFT.md`.
 
 Remote delivery is blocked: `git push -u origin feature/bootstrap-foundation` failed with GitHub 403 because this computer is authenticated as `Fameplus22`, which does not have permission to push to `simbiat-taxninja12/vacation-planner`.
+
+## Lane B Pending Verification
+
+- `npm run lint`: PASS after Lane B changes.
+- `npm run typecheck`: PASS after Lane B changes.
+- `npm run build`: PASS after Lane B changes. Build includes `/trips/[id]`.
+- Trip form global fields render: Build-verified, browser signed-in UAT still blocked by Supabase email confirmation.
+- Protected trip detail route compiles and is server-protected: PASS by build/typecheck.
+- New migration applies after bootstrap migration: Pending Supabase access.

@@ -7,8 +7,8 @@
   - Next step: Monitor/update Next when an upstream patched version is available for the current major line.
 
 - Severity: Medium
-  - Issue: Live trip-save UAT depends on the Supabase migration being applied to the project database.
-  - Next step: Apply `supabase/migrations/20260507000000_bootstrap_foundation.sql`, then retest sign-in, draft save, and dashboard retrieval.
+  - Issue: Live trip-save and trip-detail UAT depend on the Supabase migrations being applied to the project database.
+  - Next step: Apply all files in `supabase/migrations/` in timestamp order, then retest sign-in, draft save, trip detail, and dashboard retrieval.
 
 - Severity: Medium
   - Issue: Supabase email confirmation blocks signed-in browser UAT for generated test accounts.

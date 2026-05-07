@@ -6,9 +6,11 @@ import { useActionState, useMemo, useState } from "react";
 
 import { createTripDraftAction } from "@/app/trips/new/actions";
 import { idleActionState } from "@/lib/action-state";
+import { SUPPORTED_CURRENCIES, SUPPORTED_LOCALES } from "@/lib/globalization";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 type CityDraft = {
   id: string;
@@ -40,7 +42,7 @@ export function TripForm() {
 
   return (
     <form action={formAction} className="space-y-8" noValidate>
-      <div className="grid gap-5 md:grid-cols-[1fr_180px]">
+      <div className="grid gap-5 md:grid-cols-[1fr_180px_180px]">
         <div className="space-y-2">
           <Label htmlFor="country_name">Destination country</Label>
           <Input
@@ -55,6 +57,24 @@ export function TripForm() {
           {state.fieldErrors?.country_name ? (
             <p className="text-sm font-medium text-destructive" id="country-error">
               {state.fieldErrors.country_name}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="traveler_count">Travelers</Label>
+          <Input
+            defaultValue={1}
+            id="traveler_count"
+            max={99}
+            min={1}
+            name="traveler_count"
+            type="number"
+            required
+          />
+          {state.fieldErrors?.traveler_count ? (
+            <p className="text-sm font-medium text-destructive">
+              {state.fieldErrors.traveler_count}
             </p>
           ) : null}
         </div>
@@ -76,6 +96,73 @@ export function TripForm() {
               {state.fieldErrors.total_days}
             </p>
           ) : null}
+        </div>
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="starts_on">Start date</Label>
+          <Input id="starts_on" name="starts_on" type="date" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="ends_on">End date</Label>
+          <Input id="ends_on" name="ends_on" type="date" />
+          {state.fieldErrors?.ends_on ? (
+            <p className="text-sm font-medium text-destructive">
+              {state.fieldErrors.ends_on}
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-[1fr_180px_220px]">
+        <div className="space-y-2">
+          <Label htmlFor="budget_amount">Estimated budget</Label>
+          <Input
+            id="budget_amount"
+            min={0}
+            name="budget_amount"
+            placeholder="5000"
+            step="0.01"
+            type="number"
+          />
+          {state.fieldErrors?.budget_amount ? (
+            <p className="text-sm font-medium text-destructive">
+              {state.fieldErrors.budget_amount}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="currency_code">Currency</Label>
+          <select
+            className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            defaultValue="USD"
+            id="currency_code"
+            name="currency_code"
+          >
+            {SUPPORTED_CURRENCIES.map((currency) => (
+              <option key={currency.code} value={currency.code}>
+                {currency.code}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="planning_locale">Planning language</Label>
+          <select
+            className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            defaultValue="en"
+            id="planning_locale"
+            name="planning_locale"
+          >
+            {SUPPORTED_LOCALES.map((locale) => (
+              <option key={locale.code} value={locale.code}>
+                {locale.label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -186,6 +273,15 @@ export function TripForm() {
           </p>
         ) : null}
       </section>
+
+      <div className="space-y-2">
+        <Label htmlFor="notes">Planning notes</Label>
+        <Textarea
+          id="notes"
+          name="notes"
+          placeholder="Food priorities, accessibility needs, visa reminders, school schedules, or anything that will shape this trip."
+        />
+      </div>
 
       {state.message ? (
         <p

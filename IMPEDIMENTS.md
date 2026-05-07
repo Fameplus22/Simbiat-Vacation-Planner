@@ -3,10 +3,10 @@
 ## Current
 
 - Status: Pending verification
-  - Blocker: Applying the Supabase SQL migration requires database/dashboard access that is not present in the repo.
-  - Impact: Auth UI can be built and checked, but live draft trip creation will fail until the `profiles`, `trips`, and `trip_cities` tables and RLS policies exist in Supabase.
-  - Needed input: Apply `supabase/migrations/20260507000000_bootstrap_foundation.sql` in the Supabase dashboard or provide a safe migration workflow.
-  - Recommendation: Apply the migration manually in Supabase SQL Editor for this Phase 1 bootstrap.
+  - Blocker: Applying the Supabase SQL migrations requires database/dashboard access that is not present in the repo.
+  - Impact: Auth UI can be built and checked, but live draft trip creation and trip detail retrieval will fail until the `profiles`, `trips`, and `trip_cities` tables plus global planning columns exist in Supabase.
+  - Needed input: Apply all SQL files in `supabase/migrations/` in timestamp order in the Supabase dashboard or provide a safe migration workflow.
+  - Recommendation: Apply the migrations manually in Supabase SQL Editor for this bootstrap and global planning pass.
   - Reply-Code: VP-9CKCBP4Q7F
 
 - Status: Confirmed

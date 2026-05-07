@@ -9,6 +9,8 @@ Vacation Planner is a secure Phase 1 foundation for saving draft vacation plans.
 - Email/password sign-in at `/auth/sign-in`
 - Protected dashboard at `/dashboard`
 - Protected draft trip creation at `/trips/new`
+- Protected trip detail at `/trips/[id]`
+- Currency, language, dates, traveler count, budget, and planning notes
 - Supabase schema and RLS setup for `profiles`, `trips`, and `trip_cities`
 - Repo hygiene for local env files and fresh-machine setup
 
@@ -50,7 +52,7 @@ This repo uses npm because `package-lock.json` is committed.
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-or-anon-key
    ```
 
-5. Apply the Supabase SQL migration in `supabase/migrations/20260507000000_bootstrap_foundation.sql`.
+5. Apply the Supabase SQL migrations in `supabase/migrations/` in timestamp order.
 
 6. Start the app:
 
@@ -75,6 +77,11 @@ npm run start
 The browser only receives `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. These values are public by design. Do not commit service-role keys, secret keys, database passwords, or admin keys.
 
 The SQL migration enables RLS on all Phase 1 tables. Users can only access rows owned by their own `auth.uid()`.
+
+## Delivery Lanes
+
+- Lane A live launch unblock: `docs/lane-a-live-launch.md`
+- Lane B global product build: `docs/lane-b-global-product.md`
 
 ## Email Blocker Routing
 

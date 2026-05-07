@@ -1,7 +1,10 @@
-import { CalendarDays, MapPin } from "lucide-react";
+import { CalendarDays, MapPin, Users } from "lucide-react";
+import Link from "next/link";
 
+import { formatCurrency, formatTripDate } from "@/lib/globalization";
 import { type TripSummary } from "@/lib/trips";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -32,12 +35,29 @@ export function TripCard({ trip }: TripCardProps) {
         <Badge>Draft</Badge>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <CalendarDays className="h-4 w-4" />
-          {trip.total_days} total days
+        <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+          <span className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4" />
+            {formatTripDate(trip.starts_on, trip.planning_locale)} -{" "}
+            {formatTripDate(trip.ends_on, trip.planning_locale)}
+          </span>
+          <span className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            {trip.traveler_count} traveler{trip.traveler_count === 1 ? "" : "s"}
+          </span>
         </div>
-        <div className="text-sm font-medium text-foreground">
-          {trip.trip_cities.reduce((sum, city) => sum + city.days_in_city, 0)} days allocated
+        <div className="flex flex-col gap-3 sm:items-end">
+          <div className="text-sm font-medium text-foreground">
+            {trip.total_days} days ·{" "}
+            {formatCurrency(
+              trip.budget_amount === null ? null : Number(trip.budget_amount),
+              trip.currency_code,
+              trip.planning_locale,
+            )}
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/trips/${trip.id}`}>Open trip</Link>
+          </Button>
         </div>
       </CardContent>
     </Card>

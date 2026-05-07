@@ -2,8 +2,11 @@
 
 ## Phase 2 Candidates
 
-- Add trip detail pages with editable city allocations.
+- Add editable city allocations on trip detail pages.
 - Add traveler counts, trip dates, budget bands, and planning notes.
+- Add true localization files and translated copy for supported languages.
+- Add live currency conversion through a server-side provider.
+- Add real-time trip collaboration and invite permissions.
 - Add invite/collaboration design after access-control rules are specified.
 - Add hotel, activity, and attraction API integrations behind server-side adapters.
 - Add currency conversion through a server-side provider.
