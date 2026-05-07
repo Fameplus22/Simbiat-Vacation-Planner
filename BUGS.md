@@ -7,8 +7,8 @@
   - Next step: Monitor/update Next when an upstream patched version is available for the current major line.
 
 - Severity: Medium
-  - Issue: Live trip-save, trip-detail, trip-edit, and itinerary UAT depend on the Supabase migrations being applied to the project database.
-  - Next step: Apply all files in `supabase/migrations/` in timestamp order, then retest sign-in, draft save, trip detail, draft edit, itinerary generation, and dashboard retrieval.
+  - Issue: Live trip-save, trip-detail, trip-edit, itinerary generation, and itinerary detail UAT depend on the Supabase migrations being applied to the project database.
+  - Next step: Apply all files in `supabase/migrations/` in timestamp order, then retest sign-in, draft save, trip detail, draft edit, itinerary generation, itinerary detail saving, and dashboard retrieval.
 
 - Severity: Medium
   - Issue: Supabase email confirmation blocks signed-in browser UAT for generated test accounts.

@@ -38,3 +38,10 @@
 - Added `public.regenerate_trip_days(...)` RPC to generate day rows from city allocation while preserving existing day detail fields.
 - Added itinerary CTA to trip detail pages.
 - Updated setup, backlog, blocker, and UAT artifacts for the new itinerary migration.
+
+## Lane B Itinerary Editing
+
+- Added editable itinerary day titles and notes on `/trips/[id]/itinerary`.
+- Added `public.update_trip_day_details(...)` RPC to save day detail updates transactionally under RLS.
+- Added client-side save states for itinerary detail edits.
+- Updated Lane B docs, backlog, blocker, and UAT artifacts for the new itinerary editing migration.

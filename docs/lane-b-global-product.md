@@ -20,12 +20,14 @@ The product must support travelers across countries, languages, currencies, trav
 - Third migration with `public.update_trip_draft(...)` so trip fields and city allocations update atomically under RLS.
 - Protected itinerary page at `/trips/[id]/itinerary`.
 - Fourth migration with `trip_days` and `public.regenerate_trip_days(...)` to create day-by-day planning rows from city allocations.
+- Editable itinerary day titles and notes.
+- Fifth migration with `public.update_trip_day_details(...)` to save itinerary details transactionally under RLS.
 
 ## Next Commercial Slices
 
 - Localization files and translated UI strings.
 - Currency conversion provider behind a server-side adapter.
-- Editable day notes, activity blocks, and transit placeholders on itinerary days.
+- Structured activity blocks and transit placeholders on itinerary days.
 - Trip status lifecycle beyond `draft`.
 - Real-time collaboration model and access control.
 - Activity/hotel/flight provider abstraction.

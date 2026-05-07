@@ -14,7 +14,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SiteHeader } from "@/components/site-header";
-import { regenerateTripDaysAction } from "./actions";
+import { ItineraryDayEditor } from "@/components/trips/itinerary-day-editor";
+import { regenerateTripDaysAction, updateTripDaysAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -169,29 +170,12 @@ export default async function TripItineraryPage({
             ) : null}
 
             {!itineraryError && tripDays.length > 0 ? (
-              <section className="grid gap-4 md:grid-cols-2" aria-label="Itinerary days">
-                {tripDays.map((day) => (
-                  <Card key={day.id}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <CardTitle className="text-lg">
-                            Day {day.day_number}
-                          </CardTitle>
-                          <CardDescription>{day.city_name}</CardDescription>
-                        </div>
-                        <Badge>{trip.planning_locale.toUpperCase()}</Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm text-muted-foreground">
-                      <p className="font-medium text-foreground">{day.title}</p>
-                      <p className="whitespace-pre-wrap leading-6">
-                        {day.notes || "Activities, meals, transit, and booking details will land here."}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </section>
+              <ItineraryDayEditor
+                action={updateTripDaysAction}
+                localeCode={trip.planning_locale}
+                tripDays={tripDays}
+                tripId={trip.id}
+              />
             ) : null}
           </>
         ) : null}

@@ -4,9 +4,9 @@
 
 - Status: Pending verification
   - Blocker: Applying the Supabase SQL migrations requires database/dashboard access that is not present in the repo.
-  - Impact: Auth UI can be built and checked, but live draft trip creation, trip detail retrieval, draft editing, and itinerary generation will fail until the `profiles`, `trips`, `trip_cities`, and `trip_days` tables, global planning columns, and draft/itinerary RPCs exist in Supabase.
+  - Impact: Auth UI can be built and checked, but live draft trip creation, trip detail retrieval, draft editing, itinerary generation, and itinerary detail saving will fail until the `profiles`, `trips`, `trip_cities`, and `trip_days` tables, global planning columns, and draft/itinerary RPCs exist in Supabase.
   - Needed input: Apply all SQL files in `supabase/migrations/` in timestamp order in the Supabase dashboard or provide a safe migration workflow.
-  - Recommendation: Apply the migrations manually in Supabase SQL Editor for this bootstrap, global planning, editable-draft, and itinerary pass.
+  - Recommendation: Apply the migrations manually in Supabase SQL Editor for this bootstrap, global planning, editable-draft, itinerary, and itinerary-editing pass.
   - Reply-Code: VP-9CKCBP4Q7F
 
 - Status: Confirmed

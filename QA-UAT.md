@@ -2,7 +2,7 @@
 
 ## Environment
 
-- Current Lane B branch: `feature/lane-b-itinerary-foundation`
+- Current Lane B branch: `feature/lane-b-itinerary-editing`
 - Baseline Phase 1 branch: `feature/bootstrap-foundation`
 - Reply-Code: `VP-9CKCBP4Q7F`
 - Supabase env names present locally: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
@@ -68,3 +68,11 @@ Remote delivery is blocked: `git push -u origin feature/bootstrap-foundation` fa
 - Protected itinerary route `/trips/[id]/itinerary` compiles and calls `requireUser()`: PASS by typecheck.
 - Itinerary generation action: RPC call compiles; live database UAT pending application of `20260507030000_itinerary_foundation.sql`.
 - Signed-out protected itinerary redirect: PASS. `/trips/not-a-real-id/itinerary` redirects to `/auth/sign-in?next=%2Ftrips%2Fnot-a-real-id%2Fitinerary`.
+
+## Lane B Itinerary Editing Verification
+
+- `npm run lint`: PASS after itinerary editing changes.
+- `npm run typecheck`: PASS after itinerary editing changes.
+- `npm run build`: PASS after itinerary editing changes.
+- Editable itinerary day title/note form compiles with server action state handling: PASS by typecheck.
+- Itinerary detail save action: RPC call compiles; live database UAT pending application of `20260507040000_itinerary_day_editing.sql`.

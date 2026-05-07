@@ -16,6 +16,7 @@ Vacation Planner is a secure Phase 1 foundation for saving draft vacation plans.
 - Supabase schema and RLS setup for `profiles`, `trips`, `trip_cities`, and `trip_days`
 - Supabase RPC for atomic draft trip updates
 - Supabase RPC for generating itinerary days from city allocations
+- Supabase RPC for saving itinerary day titles and notes
 - Repo hygiene for local env files and fresh-machine setup
 
 Out of scope for this pass: hotel APIs, activity APIs, live pricing, currency conversion, payment flows, full PWA install, recommendation engines, and premium budgeting.
