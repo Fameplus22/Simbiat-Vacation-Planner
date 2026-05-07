@@ -10,7 +10,7 @@ Lane A is the path to getting the current foundation live, testable, and ready f
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 4. Deploy `https://github.com/Fameplus22/Simbiat-Vacation-Planner`.
-5. Rerun UAT for sign-up, sign-in, protected routes, trip save, trip detail, dashboard list, and sign-out.
+5. Rerun UAT for sign-up, sign-in, protected routes, trip save, trip detail, trip edit, dashboard list, and sign-out.
 
 ## Blockers That Need Human Access
 
@@ -20,4 +20,4 @@ Lane A is the path to getting the current foundation live, testable, and ready f
 
 ## Acceptance Gate
 
-Lane A is complete when a new confirmed user can sign in on the deployed app, create a trip with currency/language/date/budget fields, land on the trip detail page, return to the dashboard, see the saved trip, sign out, and be redirected away from protected pages.
+Lane A is complete when a new confirmed user can sign in on the deployed app, create a trip with currency/language/date/budget fields, land on the trip detail page, edit the draft, return to the dashboard, see the updated trip, sign out, and be redirected away from protected pages.

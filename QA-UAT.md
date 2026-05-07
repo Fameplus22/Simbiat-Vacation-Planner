@@ -2,7 +2,8 @@
 
 ## Environment
 
-- Branch: `feature/bootstrap-foundation`
+- Current Lane B branch: `feature/lane-b-editable-trips`
+- Baseline Phase 1 branch: `feature/bootstrap-foundation`
 - Reply-Code: `VP-9CKCBP4Q7F`
 - Supabase env names present locally: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - Service-role/admin env names found: none detected by variable name inspection
@@ -44,3 +45,17 @@ Remote delivery is blocked: `git push -u origin feature/bootstrap-foundation` fa
 - Trip form global fields render: Build-verified, browser signed-in UAT still blocked by Supabase email confirmation.
 - Protected trip detail route compiles and is server-protected: PASS by build/typecheck.
 - New migration applies after bootstrap migration: Pending Supabase access.
+
+## Lane B Editable Draft Verification
+
+- `npm run lint`: PASS after editable draft changes.
+- `npm run typecheck`: PASS after editable draft changes.
+- `npm run build`: PASS after editable draft changes. Build includes `/trips/[id]/edit`.
+- Protected edit route `/trips/[id]/edit` compiles and calls `requireUser()`: PASS by typecheck.
+- Edit form prefill behavior: Build/typecheck verified from existing trip data shape; signed-in browser UAT still blocked by Supabase email confirmation and unapplied migrations.
+- Draft update action: Server-side validation and RPC call compile; live database UAT pending application of `20260507020000_trip_editing_foundation.sql`.
+- Browser screenshot, landing page: PASS, captured at `output/playwright/lane-b-landing.png`.
+- Browser screenshot, sign-in page: PASS, captured at `output/playwright/lane-b-sign-in.png`.
+- Signed-out protected edit redirect: PASS. `/trips/not-a-real-id/edit` redirects to `/auth/sign-in?next=%2Ftrips%2Fnot-a-real-id%2Fedit`; screenshot captured at `output/playwright/lane-b-edit-redirect.png`.
+- Favicon route: PASS. `GET /favicon.svg` returns `200 OK` with `image/svg+xml`.
+- Browser console sanity: PASS after favicon metadata/file addition. Fresh landing load had no app error; dev-only React/HMR messages are expected.

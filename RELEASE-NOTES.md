@@ -21,3 +21,12 @@
 - Added protected trip detail page at `/trips/[id]`.
 - Added second Supabase migration for global planning fields.
 - Added Lane A live-launch and Lane B global-product docs.
+
+## Lane B Editable Drafts
+
+- Added protected draft editing at `/trips/[id]/edit`.
+- Refactored trip draft validation into a shared server-side parser.
+- Added a Supabase RPC migration for atomic trip draft updates and city allocation replacement under RLS.
+- Added edit CTA and update success state on trip detail pages.
+- Added favicon metadata and asset to remove the browser favicon 404.
+- Updated Lane B docs, backlog, UAT notes, and release trail.

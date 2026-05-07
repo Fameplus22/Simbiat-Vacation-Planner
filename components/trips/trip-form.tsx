@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useActionState, useMemo, useState } from "react";
 
 import { createTripDraftAction } from "@/app/trips/new/actions";
-import { idleActionState } from "@/lib/action-state";
+import { type ActionState, idleActionState } from "@/lib/action-state";
 import { SUPPORTED_CURRENCIES, SUPPORTED_LOCALES } from "@/lib/globalization";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,26 +13,69 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 type CityDraft = {
-  id: string;
+  rowId: string;
+  existingId?: string;
   cityName: string;
   days: number;
 };
 
-function createCityDraft(index: number): CityDraft {
+export type TripFormInitialValues = {
+  tripId?: string;
+  countryName?: string;
+  totalDays?: number;
+  startsOn?: string | null;
+  endsOn?: string | null;
+  travelerCount?: number;
+  budgetAmount?: number | null;
+  currencyCode?: string;
+  planningLocale?: string;
+  notes?: string | null;
+  cities?: {
+    id?: string;
+    cityName: string;
+    days: number;
+  }[];
+};
+
+type TripFormCityInitialValue = NonNullable<TripFormInitialValues["cities"]>[number];
+
+type TripFormProps = {
+  action?: (
+    previousState: ActionState,
+    formData: FormData,
+  ) => Promise<ActionState>;
+  cancelHref?: string;
+  initialValues?: TripFormInitialValues;
+  submitLabel?: string;
+};
+
+function createCityDraft(
+  index: number,
+  city?: TripFormCityInitialValue,
+): CityDraft {
   return {
-    id: `city-${index}`,
-    cityName: "",
-    days: 1,
+    rowId: city?.id ? `city-${city.id}` : `city-${index}`,
+    existingId: city?.id,
+    cityName: city?.cityName ?? "",
+    days: city?.days ?? 1,
   };
 }
 
-export function TripForm() {
-  const [state, formAction, isPending] = useActionState(
-    createTripDraftAction,
-    idleActionState,
-  );
-  const [cities, setCities] = useState<CityDraft[]>([createCityDraft(0)]);
-  const [totalDays, setTotalDays] = useState(1);
+export function TripForm({
+  action = createTripDraftAction,
+  cancelHref = "/dashboard",
+  initialValues,
+  submitLabel = "Save draft trip",
+}: TripFormProps) {
+  const [state, formAction, isPending] = useActionState(action, idleActionState);
+  const [cities, setCities] = useState<CityDraft[]>(() => {
+    if (initialValues?.cities?.length) {
+      return initialValues.cities.map((city, index) => createCityDraft(index, city));
+    }
+
+    return [createCityDraft(0)];
+  });
+  const [totalDays, setTotalDays] = useState(initialValues?.totalDays ?? 1);
 
   const allocatedDays = useMemo(
     () => cities.reduce((sum, city) => sum + Number(city.days || 0), 0),
@@ -42,10 +85,15 @@ export function TripForm() {
 
   return (
     <form action={formAction} className="space-y-8" noValidate>
+      {initialValues?.tripId ? (
+        <input name="trip_id" type="hidden" value={initialValues.tripId} />
+      ) : null}
+
       <div className="grid gap-5 md:grid-cols-[1fr_180px_180px]">
         <div className="space-y-2">
           <Label htmlFor="country_name">Destination country</Label>
           <Input
+            defaultValue={initialValues?.countryName ?? ""}
             id="country_name"
             name="country_name"
             placeholder="Portugal"
@@ -64,7 +112,7 @@ export function TripForm() {
         <div className="space-y-2">
           <Label htmlFor="traveler_count">Travelers</Label>
           <Input
-            defaultValue={1}
+            defaultValue={initialValues?.travelerCount ?? 1}
             id="traveler_count"
             max={99}
             min={1}
@@ -102,11 +150,26 @@ export function TripForm() {
       <div className="grid gap-5 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="starts_on">Start date</Label>
-          <Input id="starts_on" name="starts_on" type="date" />
+          <Input
+            defaultValue={initialValues?.startsOn ?? ""}
+            id="starts_on"
+            name="starts_on"
+            type="date"
+          />
+          {state.fieldErrors?.starts_on ? (
+            <p className="text-sm font-medium text-destructive">
+              {state.fieldErrors.starts_on}
+            </p>
+          ) : null}
         </div>
         <div className="space-y-2">
           <Label htmlFor="ends_on">End date</Label>
-          <Input id="ends_on" name="ends_on" type="date" />
+          <Input
+            defaultValue={initialValues?.endsOn ?? ""}
+            id="ends_on"
+            name="ends_on"
+            type="date"
+          />
           {state.fieldErrors?.ends_on ? (
             <p className="text-sm font-medium text-destructive">
               {state.fieldErrors.ends_on}
@@ -119,6 +182,7 @@ export function TripForm() {
         <div className="space-y-2">
           <Label htmlFor="budget_amount">Estimated budget</Label>
           <Input
+            defaultValue={initialValues?.budgetAmount ?? ""}
             id="budget_amount"
             min={0}
             name="budget_amount"
@@ -137,7 +201,7 @@ export function TripForm() {
           <Label htmlFor="currency_code">Currency</Label>
           <select
             className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            defaultValue="USD"
+            defaultValue={initialValues?.currencyCode ?? "USD"}
             id="currency_code"
             name="currency_code"
           >
@@ -147,13 +211,18 @@ export function TripForm() {
               </option>
             ))}
           </select>
+          {state.fieldErrors?.currency_code ? (
+            <p className="text-sm font-medium text-destructive">
+              {state.fieldErrors.currency_code}
+            </p>
+          ) : null}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="planning_locale">Planning language</Label>
           <select
             className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            defaultValue="en"
+            defaultValue={initialValues?.planningLocale ?? "en"}
             id="planning_locale"
             name="planning_locale"
           >
@@ -163,6 +232,11 @@ export function TripForm() {
               </option>
             ))}
           </select>
+          {state.fieldErrors?.planning_locale ? (
+            <p className="text-sm font-medium text-destructive">
+              {state.fieldErrors.planning_locale}
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -182,7 +256,7 @@ export function TripForm() {
                 ...current,
                 {
                   ...createCityDraft(current.length),
-                  id: `city-${Date.now()}-${current.length}`,
+                  rowId: `city-${Date.now()}-${current.length}`,
                 },
               ])
             }
@@ -198,18 +272,21 @@ export function TripForm() {
           {cities.map((city, index) => (
             <div
               className="grid gap-3 rounded-lg border border-border bg-background p-3 sm:grid-cols-[1fr_140px_44px]"
-              key={city.id}
+              key={city.rowId}
             >
+              <input name="trip_city_id" type="hidden" value={city.existingId ?? ""} />
               <div className="space-y-2">
-                <Label htmlFor={`${city.id}-name`}>City {index + 1}</Label>
+                <Label htmlFor={`${city.rowId}-name`}>City {index + 1}</Label>
                 <Input
-                  id={`${city.id}-name`}
+                  id={`${city.rowId}-name`}
                   name="city_name"
                   onChange={(event) => {
                     const value = event.target.value;
                     setCities((current) =>
                       current.map((item) =>
-                        item.id === city.id ? { ...item, cityName: value } : item,
+                        item.rowId === city.rowId
+                          ? { ...item, cityName: value }
+                          : item,
                       ),
                     );
                   }}
@@ -220,16 +297,18 @@ export function TripForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor={`${city.id}-days`}>Days</Label>
+                <Label htmlFor={`${city.rowId}-days`}>Days</Label>
                 <Input
-                  id={`${city.id}-days`}
+                  id={`${city.rowId}-days`}
                   min={1}
                   name="days_in_city"
                   onChange={(event) => {
                     const value = Number(event.target.value || 0);
                     setCities((current) =>
                       current.map((item) =>
-                        item.id === city.id ? { ...item, days: value } : item,
+                        item.rowId === city.rowId
+                          ? { ...item, days: value }
+                          : item,
                       ),
                     );
                   }}
@@ -244,7 +323,9 @@ export function TripForm() {
                 className="self-end"
                 disabled={cities.length === 1}
                 onClick={() =>
-                  setCities((current) => current.filter((item) => item.id !== city.id))
+                  setCities((current) =>
+                    current.filter((item) => item.rowId !== city.rowId),
+                  )
                 }
                 type="button"
                 variant="ghost"
@@ -277,10 +358,16 @@ export function TripForm() {
       <div className="space-y-2">
         <Label htmlFor="notes">Planning notes</Label>
         <Textarea
+          defaultValue={initialValues?.notes ?? ""}
           id="notes"
           name="notes"
           placeholder="Food priorities, accessibility needs, visa reminders, school schedules, or anything that will shape this trip."
         />
+        {state.fieldErrors?.notes ? (
+          <p className="text-sm font-medium text-destructive">
+            {state.fieldErrors.notes}
+          </p>
+        ) : null}
       </div>
 
       {state.message ? (
@@ -294,11 +381,11 @@ export function TripForm() {
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
         <Button asChild variant="outline">
-          <Link href="/dashboard">Cancel</Link>
+          <Link href={cancelHref}>Cancel</Link>
         </Button>
         <Button disabled={isPending} type="submit">
           {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          Save draft trip
+          {submitLabel}
         </Button>
       </div>
     </form>

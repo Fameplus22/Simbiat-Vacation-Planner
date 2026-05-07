@@ -7,8 +7,8 @@
   - Next step: Monitor/update Next when an upstream patched version is available for the current major line.
 
 - Severity: Medium
-  - Issue: Live trip-save and trip-detail UAT depend on the Supabase migrations being applied to the project database.
-  - Next step: Apply all files in `supabase/migrations/` in timestamp order, then retest sign-in, draft save, trip detail, and dashboard retrieval.
+  - Issue: Live trip-save, trip-detail, and trip-edit UAT depend on the Supabase migrations being applied to the project database.
+  - Next step: Apply all files in `supabase/migrations/` in timestamp order, then retest sign-in, draft save, trip detail, draft edit, and dashboard retrieval.
 
 - Severity: Medium
   - Issue: Supabase email confirmation blocks signed-in browser UAT for generated test accounts.
@@ -16,7 +16,7 @@
 
 - Severity: High
   - Issue: Remote push is blocked by GitHub 403 because local Git credentials belong to `Fameplus22`, which cannot push to this repo.
-  - Next step: Authenticate as a GitHub account with write access or grant `Fameplus22` write access, then rerun `git push -u origin feature/bootstrap-foundation`.
+  - Next step: Use the `publish` remote for immediate delivery, or authenticate as a GitHub account with write access to the original repo.
 
 ## Closed
 

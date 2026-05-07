@@ -4,9 +4,9 @@
 
 - Status: Pending verification
   - Blocker: Applying the Supabase SQL migrations requires database/dashboard access that is not present in the repo.
-  - Impact: Auth UI can be built and checked, but live draft trip creation and trip detail retrieval will fail until the `profiles`, `trips`, and `trip_cities` tables plus global planning columns exist in Supabase.
+  - Impact: Auth UI can be built and checked, but live draft trip creation, trip detail retrieval, and draft editing will fail until the `profiles`, `trips`, and `trip_cities` tables, global planning columns, and `update_trip_draft` RPC exist in Supabase.
   - Needed input: Apply all SQL files in `supabase/migrations/` in timestamp order in the Supabase dashboard or provide a safe migration workflow.
-  - Recommendation: Apply the migrations manually in Supabase SQL Editor for this bootstrap and global planning pass.
+  - Recommendation: Apply the migrations manually in Supabase SQL Editor for this bootstrap, global planning, and editable-draft pass.
   - Reply-Code: VP-9CKCBP4Q7F
 
 - Status: Confirmed
@@ -32,9 +32,9 @@
 
 - Status: Confirmed
   - Blocker: `git push -u origin feature/bootstrap-foundation` failed with GitHub 403 because this computer is authenticated as `Fameplus22`, which does not have permission to push to `simbiat-taxninja12/vacation-planner`.
-  - Impact: The branch is committed locally but not yet on GitHub.
-  - Needed input: Authenticate Git on this computer as an account with write access to the repo, or add `Fameplus22` as a collaborator with write access.
-  - Recommendation: Sign in with the intended GitHub account, then rerun `git push -u origin feature/bootstrap-foundation`.
+  - Impact: The original `origin` remote cannot be updated from this machine. The alternate `publish` remote under `Fameplus22/Simbiat-Vacation-Planner` is available for branch publishing.
+  - Needed input: To publish back to the original repo, authenticate Git on this computer as an account with write access or add `Fameplus22` as a collaborator with write access.
+  - Recommendation: Continue using `publish` for immediate delivery, then either merge there or grant write access on the original repo.
   - Reply-Code: VP-9CKCBP4Q7F
 
 ## Email Routing Rule

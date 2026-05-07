@@ -59,7 +59,7 @@ export async function getTripForUser(tripId: string, userId: string) {
     )
     .eq("id", tripId)
     .eq("user_id", userId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     return { trip: null, error: error.message };

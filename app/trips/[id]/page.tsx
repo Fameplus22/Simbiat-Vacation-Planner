@@ -1,4 +1,11 @@
-import { ArrowLeft, CalendarDays, Globe2, Landmark, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  Globe2,
+  Landmark,
+  Pencil,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 
 import { requireUser } from "@/lib/auth";
@@ -30,6 +37,7 @@ export default async function TripDetailPage({
   const { id } = await params;
   const query = await searchParams;
   const wasCreated = query?.created === "1";
+  const wasUpdated = query?.updated === "1";
   const { trip, error } = await getTripForUser(id, user.id);
 
   return (
@@ -55,14 +63,31 @@ export default async function TripDetailPage({
               </p>
             </div>
           </div>
-          <Button asChild>
-            <Link href="/trips/new">Plan another trip</Link>
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            {trip ? (
+              <Button asChild variant="outline">
+                <Link href={`/trips/${trip.id}/edit`}>
+                  <Pencil className="h-4 w-4" />
+                  Edit draft
+                </Link>
+              </Button>
+            ) : null}
+            <Button asChild>
+              <Link href="/trips/new">Plan another trip</Link>
+            </Button>
+          </div>
         </div>
 
         {wasCreated ? (
           <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
             Draft trip saved. Review the details below.
+          </div>
+        ) : null}
+
+        {wasUpdated ? (
+          <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
+            Draft trip updated. The dashboard and detail view now reflect the
+            latest plan.
           </div>
         ) : null}
 

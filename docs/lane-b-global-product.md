@@ -15,12 +15,16 @@ The product must support travelers across countries, languages, currencies, trav
 - Trip notes for constraints and preferences.
 - Protected trip detail page.
 - Second migration extending `profiles` and `trips` for global planning fields.
+- Protected draft trip edit page at `/trips/[id]/edit`.
+- Shared server-side trip draft validation for create and edit.
+- Third migration with `public.update_trip_draft(...)` so trip fields and city allocations update atomically under RLS.
 
 ## Next Commercial Slices
 
-- Editable trip detail form.
 - Localization files and translated UI strings.
 - Currency conversion provider behind a server-side adapter.
+- Itinerary day-by-day schedule builder.
+- Trip status lifecycle beyond `draft`.
 - Real-time collaboration model and access control.
 - Activity/hotel/flight provider abstraction.
 - Payment packaging and entitlement model.

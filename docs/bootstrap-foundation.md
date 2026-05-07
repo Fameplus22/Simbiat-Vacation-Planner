@@ -2,7 +2,7 @@
 
 ## What This Pass Adds
 
-Vacation Planner now has the minimum secure product loop: a user can authenticate, reach a protected dashboard, open a protected draft-trip form, and save a country/city/day allocation once the Supabase migration is applied.
+Vacation Planner now has the minimum secure product loop: a user can authenticate, reach a protected dashboard, open a protected draft-trip form, save a country/city/day allocation, view trip detail, and edit the draft once the Supabase migrations are applied.
 
 ## Architecture
 
@@ -10,13 +10,16 @@ Vacation Planner now has the minimum secure product loop: a user can authenticat
 - Supabase SSR clients keep auth cookies synchronized through `proxy.ts`.
 - Protected pages call server-side auth helpers before rendering data.
 - Server Actions validate form data before auth or database mutations.
+- Create and edit flows share the same runtime validation parser.
 - Supabase RLS enforces user-owned rows at the database layer.
+- Draft edits use a Supabase RPC so trip fields and city allocations update in one database transaction.
 
 ## Data Model
 
 - `profiles`: one row per auth user.
 - `trips`: draft trip records owned by one user.
 - `trip_cities`: ordered city/day allocations owned by the same user and linked to a trip.
+- `public.update_trip_draft(...)`: authenticated RPC that verifies ownership through `auth.uid()` and replaces city allocations atomically.
 
 ## Security Posture
 
