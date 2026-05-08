@@ -15,6 +15,7 @@ Vacation Planner now has the minimum secure product loop: a user can authenticat
 - Draft edits use a Supabase RPC so trip fields and city allocations update in one database transaction.
 - Itinerary generation uses a Supabase RPC so day rows are derived server-side from owned trip/city data.
 - Itinerary detail saves use a Supabase RPC so multi-day edits are applied in one database transaction.
+- Development-only local UAT storage lets this machine continue trip and itinerary testing while the connected Supabase project is still missing required migrations.
 
 ## Data Model
 
@@ -37,6 +38,10 @@ Vacation Planner now has the minimum secure product loop: a user can authenticat
 ## Local Tooling Note
 
 The local Mac rejected the native Next SWC binary code signature during verification. The npm scripts use `next dev --webpack` and `next build --webpack` so this project can run on the current machine through Next's supported Webpack path.
+
+## Local UAT Fallback
+
+When Supabase returns schema-cache errors for missing trip or itinerary tables, local development can save draft trips and itinerary day edits to `.local-uat-data/trips.json`. That folder is ignored by Git and is only for this machine's UAT. It is not production persistence and will not carry across computers; apply the Supabase migrations for real launch behavior.
 
 ## Email Blocker Code
 

@@ -66,7 +66,7 @@ export default async function TripDetailPage({
               </p>
             </div>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
             {trip ? (
               <>
                 <Button asChild variant="outline">

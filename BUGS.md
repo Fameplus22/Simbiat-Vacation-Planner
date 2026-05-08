@@ -25,6 +25,10 @@
   - Resolution: Added a development-only local UAT trip store so browser testing can continue on this machine while Supabase migrations are pending.
 
 - Severity: High
+  - Issue: Local UAT trips could open detail pages, but itinerary pages still failed when the connected Supabase project was missing `public.trip_days`.
+  - Resolution: Added development-only local itinerary generation and itinerary day saving for local UAT trips.
+
+- Severity: High
   - Issue: Valid `/trips/new` submissions failed when the connected Supabase project was missing Lane B columns such as `budget_amount`.
   - Resolution: Added schema compatibility fallbacks so basic trip creation/editing and trip reads work against the Phase 1 schema while Lane B migrations are pending.
 

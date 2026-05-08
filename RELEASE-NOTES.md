@@ -57,3 +57,9 @@
 - Added a development-only local trip store for the current machine when the connected Supabase project is missing the Phase 1 `trips` schema.
 - Valid trip forms now save locally instead of failing on Supabase schema-cache errors such as a missing `country_name` column.
 - Local UAT trips are ignored by Git and clearly labeled on trip detail pages.
+
+## Local UAT Itinerary Fallback
+
+- Added development-only local itinerary day generation for local UAT trips when Supabase is missing `trip_days`.
+- Added local itinerary title/note saving so UAT can continue before Lane A migrations are applied.
+- Added a local itinerary warning banner and tightened trip detail action button wrapping.

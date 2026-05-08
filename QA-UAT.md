@@ -95,3 +95,15 @@ Remote delivery is blocked: `git push -u origin feature/bootstrap-foundation` fa
 - Fix verification: direct `eslint .` PASS.
 - Fix verification: direct `next build --webpack` PASS.
 - Expected behavior while Supabase schema is absent: a valid trip form redirects to a local trip detail page with a local UAT warning banner.
+
+## Local UAT Itinerary Fallback Verification
+
+- Observed user-facing failure: local trip detail worked, but `/trips/local-uat-.../itinerary` still queried Supabase and showed `Could not find the table 'public.trip_days' in the schema cache`.
+- Root cause: local UAT fallback covered trips but not generated itinerary days or itinerary edit actions.
+- Fix: added development-only local itinerary day storage, local day generation from city allocation, and local itinerary day title/note saving.
+- UI fix: trip action buttons now avoid compressed/wrapped labels in the detail header.
+- Fix verification: direct `eslint .` PASS after local itinerary fallback.
+- Fix verification: direct `tsc --noEmit` PASS after local itinerary fallback.
+- Fix verification: direct `next build --webpack` PASS after local itinerary fallback. Build includes `/trips/[id]/itinerary`.
+- Dev server verification: authenticated browser request to `/trips/local-uat-36196d2a-2b07-46b9-97ff-e25c5269e4f5/itinerary` returned `200` after the fix.
+- Expected behavior while Supabase schema is absent: clicking `Generate days` on the local itinerary page creates local day cards for the current city allocation, and saving day titles/notes writes to local UAT storage only.
