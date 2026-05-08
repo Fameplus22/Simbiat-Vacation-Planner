@@ -77,33 +77,11 @@ Remote delivery is blocked: `git push -u origin feature/bootstrap-foundation` fa
 - Editable itinerary day title/note form compiles with server action state handling: PASS by typecheck.
 - Itinerary detail save action: RPC call compiles; live database UAT pending application of `20260507040000_itinerary_day_editing.sql`.
 
-## UAT Schema Compatibility Fix
+## No-Local-Data Real UAT Policy Verification
 
-- Observed user-facing failure: Supabase returned `Could not find the 'budget_amount' column of 'trips' in the schema cache` after a valid `/trips/new` submission.
-- Observed user-facing failure: Supabase returned `Could not find the 'country_name' column of 'trips' in the schema cache` after a valid `/trips/new` submission.
-- Root cause: the connected Supabase project has the basic trip schema but is missing the Lane B global-planning migrations.
-- Fix verification: `npm run lint` PASS.
-- Fix verification: `npm run typecheck` PASS.
-- Fix verification: `npm run build` PASS.
-- Expected behavior before Lane B migrations: basic trip creation and edit fall back to saving country, total days, and city allocation; dates, budget, currency, language, notes, and itinerary still require the migrations for persistence.
-
-## Local UAT Fallback Verification
-
-- Root cause expansion: the connected Supabase project may also be missing the Phase 1 `trips.country_name` schema, which means no database trip save can succeed from the browser.
-- Added development-only `.local-uat-data/trips.json` fallback, ignored by Git, for local UAT when Supabase trip schema is absent.
-- Fix verification: direct `tsc --noEmit` PASS.
-- Fix verification: direct `eslint .` PASS.
-- Fix verification: direct `next build --webpack` PASS.
-- Expected behavior while Supabase schema is absent: a valid trip form redirects to a local trip detail page with a local UAT warning banner.
-
-## Local UAT Itinerary Fallback Verification
-
-- Observed user-facing failure: local trip detail worked, but `/trips/local-uat-.../itinerary` still queried Supabase and showed `Could not find the table 'public.trip_days' in the schema cache`.
-- Root cause: local UAT fallback covered trips but not generated itinerary days or itinerary edit actions.
-- Fix: added development-only local itinerary day storage, local day generation from city allocation, and local itinerary day title/note saving.
-- UI fix: trip action buttons now avoid compressed/wrapped labels in the detail header.
-- Fix verification: direct `eslint .` PASS after local itinerary fallback.
-- Fix verification: direct `tsc --noEmit` PASS after local itinerary fallback.
-- Fix verification: direct `next build --webpack` PASS after local itinerary fallback. Build includes `/trips/[id]/itinerary`.
-- Dev server verification: authenticated browser request to `/trips/local-uat-36196d2a-2b07-46b9-97ff-e25c5269e4f5/itinerary` returned `200` after the fix.
-- Expected behavior while Supabase schema is absent: clicking `Generate days` on the local itinerary page creates local day cards for the current city allocation, and saving day titles/notes writes to local UAT storage only.
+- Change request: production and real UAT must use the configured Supabase project only. Missing environment variables or missing migrations must fail clearly instead of saving to any local data path.
+- Runtime update: removed the temporary same-machine trip and itinerary storage module, removed local trip ID handling, removed partial-schema trip create/edit/read compatibility paths, and removed local itinerary generation/edit paths.
+- Expected behavior when migrations are absent: signed-in trip, itinerary, and edit workflows show clear Supabase migration errors and do not persist data outside Supabase.
+- Regression check: `npm run verify:real-uat` scans runtime, docs, and config for banned no-Supabase testing paths.
+- Verification completed on 2026-05-08: real-UAT policy check PASS, lint PASS, typecheck PASS, production build PASS.
+- Note: this Codex shell did not expose `npm`, so verification used the bundled Node runtime plus the local project binaries. These are equivalent to `npm run verify:real-uat`, `npm run lint`, `npm run typecheck`, and `npm run build`.

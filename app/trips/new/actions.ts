@@ -6,45 +6,7 @@ import { redirect } from "next/navigation";
 import { type ActionState } from "@/lib/action-state";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import {
-  type TripDraftInput,
-  parseTripDraftForm,
-} from "@/lib/trip-draft-input";
-import { canUseLocalUatStore, createLocalTrip } from "@/lib/local-uat-store";
-
-function isSchemaBehindError(message?: string) {
-  return Boolean(
-    message &&
-      (message.includes("schema cache") ||
-        message.includes("Could not find") ||
-        message.includes("column")),
-  );
-}
-
-async function insertBasicTrip(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  input: TripDraftInput,
-) {
-  return supabase
-    .from("trips")
-    .insert({
-      user_id: userId,
-      country_name: input.countryName,
-      total_days: input.totalDays,
-      status: "draft",
-    })
-    .select("id")
-    .single();
-}
-
-async function createLocalUatTrip(userId: string, input: TripDraftInput) {
-  if (!canUseLocalUatStore()) {
-    return null;
-  }
-
-  return createLocalTrip(userId, input);
-}
+import { parseTripDraftForm } from "@/lib/trip-draft-input";
 
 export async function createTripDraftAction(
   _previousState: ActionState,
@@ -67,8 +29,7 @@ export async function createTripDraftAction(
     })
     .eq("id", user.id);
 
-  let savedWithLimitedSchema = false;
-  let { data: trip, error: tripError } = await supabase
+  const { data: trip, error: tripError } = await supabase
     .from("trips")
     .insert({
       user_id: user.id,
@@ -86,28 +47,12 @@ export async function createTripDraftAction(
     .select("id")
     .single();
 
-  if (tripError && isSchemaBehindError(tripError.message)) {
-    const basicResult = await insertBasicTrip(supabase, user.id, input);
-    trip = basicResult.data;
-    tripError = basicResult.error;
-    savedWithLimitedSchema = true;
-  }
-
-  if (tripError && isSchemaBehindError(tripError.message)) {
-    const localTrip = await createLocalUatTrip(user.id, input);
-
-    if (localTrip) {
-      revalidatePath("/dashboard");
-      redirect(`/trips/${localTrip.id}?created=1&local=1`);
-    }
-  }
-
   if (tripError || !trip) {
     return {
       status: "error",
       message:
         tripError?.message ??
-        "The trip could not be saved. Confirm the Supabase migration is applied.",
+        "The trip could not be saved. Confirm every Supabase migration is applied in production.",
     };
   }
 
@@ -124,25 +69,14 @@ export async function createTripDraftAction(
   if (cityError) {
     await supabase.from("trips").delete().eq("id", trip.id).eq("user_id", user.id);
 
-    if (isSchemaBehindError(cityError.message)) {
-      const localTrip = await createLocalUatTrip(user.id, input);
-
-      if (localTrip) {
-        revalidatePath("/dashboard");
-        redirect(`/trips/${localTrip.id}?created=1&local=1`);
-      }
-    }
-
     return {
       status: "error",
       message:
         cityError.message ??
-        "The trip cities could not be saved. Confirm the Supabase migration is applied.",
+        "The trip cities could not be saved. Confirm every Supabase migration is applied in production.",
     };
   }
 
   revalidatePath("/dashboard");
-  redirect(
-    `/trips/${trip.id}?created=1${savedWithLimitedSchema ? "&limited=1" : ""}`,
-  );
+  redirect(`/trips/${trip.id}?created=1`);
 }

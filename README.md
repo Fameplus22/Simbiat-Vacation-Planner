@@ -83,9 +83,9 @@ The browser only receives `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_P
 
 The SQL migration enables RLS on all Phase 1 tables. Users can only access rows owned by their own `auth.uid()`.
 
-## Local UAT Fallback
+## Real Supabase UAT Requirement
 
-In development only, the app can save local draft trips and itinerary days to `.local-uat-data/trips.json` when the connected Supabase project is missing required migrations. This keeps same-machine UAT moving, but it is not production or cross-computer persistence.
+Real browser UAT and production testing must use the configured Supabase project. If the required Supabase environment variables or migrations are missing, the app fails clearly and asks for the production migrations to be applied. The app does not provide a local data path for signed-in trip, itinerary, or document testing.
 
 ## Delivery Lanes
 

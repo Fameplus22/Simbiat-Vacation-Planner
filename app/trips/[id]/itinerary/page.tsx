@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { requireUser } from "@/lib/auth";
 import { listTripDaysForUser } from "@/lib/itinerary";
-import { isLocalTripId } from "@/lib/local-uat-store";
 import { getTripForUser } from "@/lib/trips";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,6 @@ export default async function TripItineraryPage({
   const query = await searchParams;
   const wasGenerated = query?.generated === "1";
   const hasItineraryError = query?.itinerary_error === "1";
-  const isLocalUatTrip = isLocalTripId(id);
   const { trip, error: tripError } = await getTripForUser(id, user.id);
   const { tripDays, error: itineraryError } = await listTripDaysForUser(
     id,
@@ -79,13 +77,6 @@ export default async function TripItineraryPage({
         {wasGenerated ? (
           <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
             Itinerary days generated from the current city allocation.
-          </div>
-        ) : null}
-
-        {isLocalUatTrip ? (
-          <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
-            Itinerary saved in local UAT fallback mode. Apply the Supabase
-            itinerary migrations before production or cross-computer testing.
           </div>
         ) : null}
 

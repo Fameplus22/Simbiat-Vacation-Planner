@@ -1,8 +1,3 @@
-import {
-  canUseLocalUatStore,
-  isLocalTripId,
-  listLocalTripDays,
-} from "@/lib/local-uat-store";
 import { createClient } from "@/lib/supabase/server";
 
 export type TripDaySummary = {
@@ -18,13 +13,6 @@ export type TripDaySummary = {
 };
 
 export async function listTripDaysForUser(tripId: string, userId: string) {
-  if (canUseLocalUatStore() && isLocalTripId(tripId)) {
-    return {
-      tripDays: await listLocalTripDays(tripId, userId),
-      error: null,
-    };
-  }
-
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("trip_days")
@@ -36,7 +24,10 @@ export async function listTripDaysForUser(tripId: string, userId: string) {
     .order("day_number", { ascending: true });
 
   if (error) {
-    return { tripDays: [], error: error.message };
+    return {
+      tripDays: [],
+      error: `${error.message}. Real UAT requires the production Supabase itinerary migrations; no local test data path is available.`,
+    };
   }
 
   return {

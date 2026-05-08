@@ -12,7 +12,7 @@
 - Replaced starter README with product-specific setup documentation.
 - Added backlog, bugs, impediments, UAT, release notes, and bootstrap docs.
 - Added project email blocker reply code `VP-9CKCBP4Q7F`.
-- Updated local dev/build scripts to use Next's Webpack path for this machine's SWC WASM fallback.
+- Updated local dev/build scripts to use Next's Webpack path for this machine's SWC WASM code-signing issue.
 
 ## Lane B Global Planning Foundation
 
@@ -46,20 +46,10 @@
 - Added client-side save states for itinerary detail edits.
 - Updated Lane B docs, backlog, blocker, and UAT artifacts for the new itinerary editing migration.
 
-## UAT Schema Compatibility Fix
+## Real Supabase UAT Policy
 
-- Added a fallback for Supabase projects that have the Phase 1 trip schema but not the Lane B global-planning columns yet.
-- Basic trip creation and editing can now save country, total days, and city allocation before the Lane B migrations are applied.
-- Trip dashboard/detail reads now fall back to the basic schema and default missing global fields for local UAT.
-
-## Local UAT Fallback
-
-- Added a development-only local trip store for the current machine when the connected Supabase project is missing the Phase 1 `trips` schema.
-- Valid trip forms now save locally instead of failing on Supabase schema-cache errors such as a missing `country_name` column.
-- Local UAT trips are ignored by Git and clearly labeled on trip detail pages.
-
-## Local UAT Itinerary Fallback
-
-- Added development-only local itinerary day generation for local UAT trips when Supabase is missing `trip_days`.
-- Added local itinerary title/note saving so UAT can continue before Lane A migrations are applied.
-- Added a local itinerary warning banner and tightened trip detail action button wrapping.
+- Removed temporary same-machine trip and itinerary storage from runtime.
+- Removed partial Supabase schema compatibility paths for trip create, edit, dashboard, and detail reads.
+- Real browser UAT now requires the configured Supabase project, all migrations in `supabase/migrations/`, and a confirmed Supabase user.
+- Missing production migrations now fail clearly instead of writing trip or itinerary data outside Supabase.
+- Added `npm run verify:real-uat` to prevent reintroducing no-Supabase testing paths.

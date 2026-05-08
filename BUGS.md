@@ -22,15 +22,15 @@
 
 - Severity: High
   - Issue: Valid `/trips/new` submissions failed when the connected Supabase project was missing the Phase 1 `trips.country_name` schema.
-  - Resolution: Added a development-only local UAT trip store so browser testing can continue on this machine while Supabase migrations are pending.
+  - Resolution: Superseded on 2026-05-08 by the real-Supabase UAT policy. The temporary local data path was removed; browser testing now requires production Supabase migrations and fails clearly when they are absent.
 
 - Severity: High
-  - Issue: Local UAT trips could open detail pages, but itinerary pages still failed when the connected Supabase project was missing `public.trip_days`.
-  - Resolution: Added development-only local itinerary generation and itinerary day saving for local UAT trips.
+  - Issue: Temporary same-machine trip records could open detail pages, but itinerary pages still failed when the connected Supabase project was missing `public.trip_days`.
+  - Resolution: Superseded on 2026-05-08 by the real-Supabase UAT policy. Itinerary generation and saving now require the Supabase itinerary migrations.
 
 - Severity: High
   - Issue: Valid `/trips/new` submissions failed when the connected Supabase project was missing Lane B columns such as `budget_amount`.
-  - Resolution: Added schema compatibility fallbacks so basic trip creation/editing and trip reads work against the Phase 1 schema while Lane B migrations are pending.
+  - Resolution: Superseded on 2026-05-08 by the real-Supabase UAT policy. Partial-schema compatibility paths were removed; Lane B fields and RPCs must exist for real UAT.
 
 - Severity: High
   - Issue: The starter repo referenced `@/lib/supabase/proxy` but did not contain that file.

@@ -5,71 +5,11 @@ import { redirect } from "next/navigation";
 
 import { type ActionState } from "@/lib/action-state";
 import { requireUser } from "@/lib/auth";
-import {
-  canUseLocalUatStore,
-  isLocalTripId,
-  updateLocalTrip,
-} from "@/lib/local-uat-store";
 import { createClient } from "@/lib/supabase/server";
-import {
-  type TripDraftInput,
-  getString,
-  parseTripDraftForm,
-} from "@/lib/trip-draft-input";
+import { getString, parseTripDraftForm } from "@/lib/trip-draft-input";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function isSchemaBehindError(message?: string) {
-  return Boolean(
-    message &&
-      (message.includes("schema cache") ||
-        message.includes("Could not find") ||
-        message.includes("function") ||
-        message.includes("column")),
-  );
-}
-
-async function updateBasicTrip(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  tripId: string,
-  userId: string,
-  input: TripDraftInput,
-) {
-  const { error: tripError } = await supabase
-    .from("trips")
-    .update({
-      country_name: input.countryName,
-      total_days: input.totalDays,
-    })
-    .eq("id", tripId)
-    .eq("user_id", userId);
-
-  if (tripError) {
-    return tripError;
-  }
-
-  const { error: deleteError } = await supabase
-    .from("trip_cities")
-    .delete()
-    .eq("trip_id", tripId)
-    .eq("user_id", userId);
-
-  if (deleteError) {
-    return deleteError;
-  }
-
-  const cityRows = input.cityRows.map((city) => ({
-    trip_id: tripId,
-    user_id: userId,
-    city_name: city.cityName,
-    days_in_city: city.daysInCity,
-    sort_order: city.sortOrder,
-  }));
-
-  const { error: cityError } = await supabase.from("trip_cities").insert(cityRows);
-  return cityError;
-}
 
 export async function updateTripDraftAction(
   _previousState: ActionState,
@@ -93,21 +33,6 @@ export async function updateTripDraftAction(
 
   const input = parsed.input;
 
-  if (canUseLocalUatStore() && isLocalTripId(tripId)) {
-    const trip = await updateLocalTrip(tripId, user.id, input);
-
-    if (!trip) {
-      return {
-        status: "error",
-        message: "This local UAT trip could not be found. Return to the dashboard and try again.",
-      };
-    }
-
-    revalidatePath("/dashboard");
-    revalidatePath(`/trips/${tripId}`);
-    redirect(`/trips/${tripId}?updated=1&local=1`);
-  }
-
   const supabase = await createClient();
 
   await supabase
@@ -118,8 +43,7 @@ export async function updateTripDraftAction(
     })
     .eq("id", user.id);
 
-  let savedWithLimitedSchema = false;
-  let { error } = await supabase.rpc("update_trip_draft", {
+  const { error } = await supabase.rpc("update_trip_draft", {
     p_trip_id: tripId,
     p_country_name: input.countryName,
     p_total_days: input.totalDays,
@@ -134,23 +58,16 @@ export async function updateTripDraftAction(
     p_days_in_city: input.cityRows.map((city) => city.daysInCity),
   });
 
-  if (error && isSchemaBehindError(error.message)) {
-    error = await updateBasicTrip(supabase, tripId, user.id, input);
-    savedWithLimitedSchema = true;
-  }
-
   if (error) {
     return {
       status: "error",
       message:
         error.message ??
-        "The trip could not be updated. Confirm all Supabase migrations are applied.",
+        "The trip could not be updated. Confirm all Supabase migrations are applied in production.",
     };
   }
 
   revalidatePath("/dashboard");
   revalidatePath(`/trips/${tripId}`);
-  redirect(
-    `/trips/${tripId}?updated=1${savedWithLimitedSchema ? "&limited=1" : ""}`,
-  );
+  redirect(`/trips/${tripId}?updated=1`);
 }

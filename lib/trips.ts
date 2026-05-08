@@ -1,17 +1,9 @@
 import { notFound } from "next/navigation";
 
-import {
-  canUseLocalUatStore,
-  getLocalTrip,
-  isLocalTripId,
-  listLocalTrips,
-} from "@/lib/local-uat-store";
 import { createClient } from "@/lib/supabase/server";
 
 const FULL_TRIP_SELECT =
   "id,country_name,total_days,starts_on,ends_on,traveler_count,budget_amount,currency_code,planning_locale,notes,status,created_at,updated_at,trip_cities(id,city_name,days_in_city,sort_order)";
-const BASIC_TRIP_SELECT =
-  "id,country_name,total_days,status,created_at,updated_at,trip_cities(id,city_name,days_in_city,sort_order)";
 
 export type TripCitySummary = {
   id: string;
@@ -37,15 +29,6 @@ export type TripSummary = {
   trip_cities: TripCitySummary[];
 };
 
-function isSchemaBehindError(message: string) {
-  return (
-    message.includes("schema cache") ||
-    message.includes("Could not find") ||
-    message.includes("column") ||
-    message.includes("relationship")
-  );
-}
-
 function normalizeTrip(trip: Partial<TripSummary>): TripSummary {
   return {
     id: trip.id ?? "",
@@ -69,32 +52,17 @@ function normalizeTrip(trip: Partial<TripSummary>): TripSummary {
 
 export async function listTripsForUser(userId: string) {
   const supabase = await createClient();
-  const fullResult = await supabase
+  const { data, error } = await supabase
     .from("trips")
     .select(FULL_TRIP_SELECT)
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
-  let data: unknown = fullResult.data;
-  let error = fullResult.error;
-
-  if (error && isSchemaBehindError(error.message)) {
-    const basicResult = await supabase
-      .from("trips")
-      .select(BASIC_TRIP_SELECT)
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-
-    data = basicResult.data;
-    error = basicResult.error;
-  }
-
-  if (error && isSchemaBehindError(error.message) && canUseLocalUatStore()) {
-    return { trips: await listLocalTrips(userId), error: null };
-  }
-
   if (error) {
-    return { trips: [], error: error.message };
+    return {
+      trips: [],
+      error: `${error.message}. Real UAT requires the production Supabase migrations; no local test data path is available.`,
+    };
   }
 
   const trips = ((data ?? []) as Partial<TripSummary>[]).map(normalizeTrip);
@@ -103,41 +71,19 @@ export async function listTripsForUser(userId: string) {
 }
 
 export async function getTripForUser(tripId: string, userId: string) {
-  if (canUseLocalUatStore() && isLocalTripId(tripId)) {
-    const trip = await getLocalTrip(tripId, userId);
-
-    if (!trip) {
-      notFound();
-    }
-
-    return { trip, error: null };
-  }
-
   const supabase = await createClient();
-  const fullResult = await supabase
+  const { data, error } = await supabase
     .from("trips")
     .select(FULL_TRIP_SELECT)
     .eq("id", tripId)
     .eq("user_id", userId)
     .maybeSingle();
 
-  let data: unknown = fullResult.data;
-  let error = fullResult.error;
-
-  if (error && isSchemaBehindError(error.message)) {
-    const basicResult = await supabase
-      .from("trips")
-      .select(BASIC_TRIP_SELECT)
-      .eq("id", tripId)
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    data = basicResult.data;
-    error = basicResult.error;
-  }
-
   if (error) {
-    return { trip: null, error: error.message };
+    return {
+      trip: null,
+      error: `${error.message}. Real UAT requires the production Supabase migrations; no local test data path is available.`,
+    };
   }
 
   if (!data) {

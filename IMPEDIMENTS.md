@@ -4,9 +4,9 @@
 
 - Status: Pending verification
   - Blocker: Applying the Supabase SQL migrations requires database/dashboard access that is not present in the repo.
-  - Impact: Auth UI and local machine UAT can continue through the development-only fallback, but real Supabase draft trip creation, trip detail retrieval, draft editing, itinerary generation, itinerary detail saving, production persistence, and cross-computer testing will fail until the `profiles`, `trips`, `trip_cities`, and `trip_days` tables, global planning columns, and draft/itinerary RPCs exist in Supabase.
+  - Impact: Real Supabase draft trip creation, trip detail retrieval, draft editing, itinerary generation, itinerary detail saving, production persistence, and cross-computer testing will fail until the `profiles`, `trips`, `trip_cities`, and `trip_days` tables, global planning columns, and draft/itinerary RPCs exist in Supabase. The app no longer provides a no-Supabase data path for real testing.
   - Needed input: Apply all SQL files in `supabase/migrations/` in timestamp order in the Supabase dashboard or provide a safe migration workflow.
-  - Recommendation: Apply the migrations manually in Supabase SQL Editor for this bootstrap, global planning, editable-draft, itinerary, and itinerary-editing pass. Local UAT can continue on this machine through the development-only fallback, but that is not production or cross-computer persistence.
+  - Recommendation: Apply the migrations manually in Supabase SQL Editor for this bootstrap, global planning, editable-draft, itinerary, and itinerary-editing pass, then rerun signed-in browser UAT against the real Supabase project.
   - Reply-Code: VP-9CKCBP4Q7F
 
 - Status: Confirmed

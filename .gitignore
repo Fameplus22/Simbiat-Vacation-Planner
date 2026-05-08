@@ -14,7 +14,6 @@
 /coverage
 /output
 /.playwright-cli
-/.local-uat-data
 
 # next.js
 /.next/
