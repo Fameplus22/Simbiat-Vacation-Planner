@@ -21,6 +21,10 @@
 ## Closed
 
 - Severity: High
+  - Issue: Valid `/trips/new` submissions failed when the connected Supabase project was missing the Phase 1 `trips.country_name` schema.
+  - Resolution: Added a development-only local UAT trip store so browser testing can continue on this machine while Supabase migrations are pending.
+
+- Severity: High
   - Issue: Valid `/trips/new` submissions failed when the connected Supabase project was missing Lane B columns such as `budget_amount`.
   - Resolution: Added schema compatibility fallbacks so basic trip creation/editing and trip reads work against the Phase 1 schema while Lane B migrations are pending.
 

@@ -51,3 +51,9 @@
 - Added a fallback for Supabase projects that have the Phase 1 trip schema but not the Lane B global-planning columns yet.
 - Basic trip creation and editing can now save country, total days, and city allocation before the Lane B migrations are applied.
 - Trip dashboard/detail reads now fall back to the basic schema and default missing global fields for local UAT.
+
+## Local UAT Fallback
+
+- Added a development-only local trip store for the current machine when the connected Supabase project is missing the Phase 1 `trips` schema.
+- Valid trip forms now save locally instead of failing on Supabase schema-cache errors such as a missing `country_name` column.
+- Local UAT trips are ignored by Git and clearly labeled on trip detail pages.

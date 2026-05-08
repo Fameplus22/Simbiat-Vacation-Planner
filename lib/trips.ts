@@ -1,5 +1,11 @@
 import { notFound } from "next/navigation";
 
+import {
+  canUseLocalUatStore,
+  getLocalTrip,
+  isLocalTripId,
+  listLocalTrips,
+} from "@/lib/local-uat-store";
 import { createClient } from "@/lib/supabase/server";
 
 const FULL_TRIP_SELECT =
@@ -83,6 +89,10 @@ export async function listTripsForUser(userId: string) {
     error = basicResult.error;
   }
 
+  if (error && isSchemaBehindError(error.message) && canUseLocalUatStore()) {
+    return { trips: await listLocalTrips(userId), error: null };
+  }
+
   if (error) {
     return { trips: [], error: error.message };
   }
@@ -93,6 +103,16 @@ export async function listTripsForUser(userId: string) {
 }
 
 export async function getTripForUser(tripId: string, userId: string) {
+  if (canUseLocalUatStore() && isLocalTripId(tripId)) {
+    const trip = await getLocalTrip(tripId, userId);
+
+    if (!trip) {
+      notFound();
+    }
+
+    return { trip, error: null };
+  }
+
   const supabase = await createClient();
   const fullResult = await supabase
     .from("trips")

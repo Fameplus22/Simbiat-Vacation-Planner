@@ -5,6 +5,11 @@ import { redirect } from "next/navigation";
 
 import { type ActionState } from "@/lib/action-state";
 import { requireUser } from "@/lib/auth";
+import {
+  canUseLocalUatStore,
+  isLocalTripId,
+  updateLocalTrip,
+} from "@/lib/local-uat-store";
 import { createClient } from "@/lib/supabase/server";
 import {
   type TripDraftInput,
@@ -87,6 +92,22 @@ export async function updateTripDraftAction(
   }
 
   const input = parsed.input;
+
+  if (canUseLocalUatStore() && isLocalTripId(tripId)) {
+    const trip = await updateLocalTrip(tripId, user.id, input);
+
+    if (!trip) {
+      return {
+        status: "error",
+        message: "This local UAT trip could not be found. Return to the dashboard and try again.",
+      };
+    }
+
+    revalidatePath("/dashboard");
+    revalidatePath(`/trips/${tripId}`);
+    redirect(`/trips/${tripId}?updated=1&local=1`);
+  }
+
   const supabase = await createClient();
 
   await supabase

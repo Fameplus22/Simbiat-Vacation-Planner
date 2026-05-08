@@ -10,6 +10,7 @@ import {
   type TripDraftInput,
   parseTripDraftForm,
 } from "@/lib/trip-draft-input";
+import { canUseLocalUatStore, createLocalTrip } from "@/lib/local-uat-store";
 
 function isSchemaBehindError(message?: string) {
   return Boolean(
@@ -35,6 +36,14 @@ async function insertBasicTrip(
     })
     .select("id")
     .single();
+}
+
+async function createLocalUatTrip(userId: string, input: TripDraftInput) {
+  if (!canUseLocalUatStore()) {
+    return null;
+  }
+
+  return createLocalTrip(userId, input);
 }
 
 export async function createTripDraftAction(
@@ -84,6 +93,15 @@ export async function createTripDraftAction(
     savedWithLimitedSchema = true;
   }
 
+  if (tripError && isSchemaBehindError(tripError.message)) {
+    const localTrip = await createLocalUatTrip(user.id, input);
+
+    if (localTrip) {
+      revalidatePath("/dashboard");
+      redirect(`/trips/${localTrip.id}?created=1&local=1`);
+    }
+  }
+
   if (tripError || !trip) {
     return {
       status: "error",
@@ -105,6 +123,15 @@ export async function createTripDraftAction(
 
   if (cityError) {
     await supabase.from("trips").delete().eq("id", trip.id).eq("user_id", user.id);
+
+    if (isSchemaBehindError(cityError.message)) {
+      const localTrip = await createLocalUatTrip(user.id, input);
+
+      if (localTrip) {
+        revalidatePath("/dashboard");
+        redirect(`/trips/${localTrip.id}?created=1&local=1`);
+      }
+    }
 
     return {
       status: "error",

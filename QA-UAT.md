@@ -80,8 +80,18 @@ Remote delivery is blocked: `git push -u origin feature/bootstrap-foundation` fa
 ## UAT Schema Compatibility Fix
 
 - Observed user-facing failure: Supabase returned `Could not find the 'budget_amount' column of 'trips' in the schema cache` after a valid `/trips/new` submission.
+- Observed user-facing failure: Supabase returned `Could not find the 'country_name' column of 'trips' in the schema cache` after a valid `/trips/new` submission.
 - Root cause: the connected Supabase project has the basic trip schema but is missing the Lane B global-planning migrations.
 - Fix verification: `npm run lint` PASS.
 - Fix verification: `npm run typecheck` PASS.
 - Fix verification: `npm run build` PASS.
 - Expected behavior before Lane B migrations: basic trip creation and edit fall back to saving country, total days, and city allocation; dates, budget, currency, language, notes, and itinerary still require the migrations for persistence.
+
+## Local UAT Fallback Verification
+
+- Root cause expansion: the connected Supabase project may also be missing the Phase 1 `trips.country_name` schema, which means no database trip save can succeed from the browser.
+- Added development-only `.local-uat-data/trips.json` fallback, ignored by Git, for local UAT when Supabase trip schema is absent.
+- Fix verification: direct `tsc --noEmit` PASS.
+- Fix verification: direct `eslint .` PASS.
+- Fix verification: direct `next build --webpack` PASS.
+- Expected behavior while Supabase schema is absent: a valid trip form redirects to a local trip detail page with a local UAT warning banner.

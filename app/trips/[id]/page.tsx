@@ -40,6 +40,7 @@ export default async function TripDetailPage({
   const wasCreated = query?.created === "1";
   const wasUpdated = query?.updated === "1";
   const savedWithLimitedSchema = query?.limited === "1";
+  const savedLocally = query?.local === "1" || id.startsWith("local-uat-");
   const { trip, error } = await getTripForUser(id, user.id);
 
   return (
@@ -106,6 +107,14 @@ export default async function TripDetailPage({
             Trip saved with the current basic Supabase schema. Apply the Lane B
             migrations to persist dates, traveler count, budget, currency,
             language, notes, and itinerary details.
+          </div>
+        ) : null}
+
+        {savedLocally ? (
+          <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+            Trip saved in local UAT fallback mode because the connected Supabase
+            project is missing the trip schema. Apply the Supabase migrations
+            before production or cross-computer testing.
           </div>
         ) : null}
 
