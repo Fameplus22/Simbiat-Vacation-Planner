@@ -45,3 +45,9 @@
 - Added `public.update_trip_day_details(...)` RPC to save day detail updates transactionally under RLS.
 - Added client-side save states for itinerary detail edits.
 - Updated Lane B docs, backlog, blocker, and UAT artifacts for the new itinerary editing migration.
+
+## UAT Schema Compatibility Fix
+
+- Added a fallback for Supabase projects that have the Phase 1 trip schema but not the Lane B global-planning columns yet.
+- Basic trip creation and editing can now save country, total days, and city allocation before the Lane B migrations are applied.
+- Trip dashboard/detail reads now fall back to the basic schema and default missing global fields for local UAT.

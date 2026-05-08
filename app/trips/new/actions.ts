@@ -6,7 +6,36 @@ import { redirect } from "next/navigation";
 import { type ActionState } from "@/lib/action-state";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { parseTripDraftForm } from "@/lib/trip-draft-input";
+import {
+  type TripDraftInput,
+  parseTripDraftForm,
+} from "@/lib/trip-draft-input";
+
+function isSchemaBehindError(message?: string) {
+  return Boolean(
+    message &&
+      (message.includes("schema cache") ||
+        message.includes("Could not find") ||
+        message.includes("column")),
+  );
+}
+
+async function insertBasicTrip(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  input: TripDraftInput,
+) {
+  return supabase
+    .from("trips")
+    .insert({
+      user_id: userId,
+      country_name: input.countryName,
+      total_days: input.totalDays,
+      status: "draft",
+    })
+    .select("id")
+    .single();
+}
 
 export async function createTripDraftAction(
   _previousState: ActionState,
@@ -29,7 +58,8 @@ export async function createTripDraftAction(
     })
     .eq("id", user.id);
 
-  const { data: trip, error: tripError } = await supabase
+  let savedWithLimitedSchema = false;
+  let { data: trip, error: tripError } = await supabase
     .from("trips")
     .insert({
       user_id: user.id,
@@ -46,6 +76,13 @@ export async function createTripDraftAction(
     })
     .select("id")
     .single();
+
+  if (tripError && isSchemaBehindError(tripError.message)) {
+    const basicResult = await insertBasicTrip(supabase, user.id, input);
+    trip = basicResult.data;
+    tripError = basicResult.error;
+    savedWithLimitedSchema = true;
+  }
 
   if (tripError || !trip) {
     return {
@@ -78,5 +115,7 @@ export async function createTripDraftAction(
   }
 
   revalidatePath("/dashboard");
-  redirect(`/trips/${trip.id}?created=1`);
+  redirect(
+    `/trips/${trip.id}?created=1${savedWithLimitedSchema ? "&limited=1" : ""}`,
+  );
 }

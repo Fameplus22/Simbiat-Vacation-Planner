@@ -76,3 +76,12 @@ Remote delivery is blocked: `git push -u origin feature/bootstrap-foundation` fa
 - `npm run build`: PASS after itinerary editing changes.
 - Editable itinerary day title/note form compiles with server action state handling: PASS by typecheck.
 - Itinerary detail save action: RPC call compiles; live database UAT pending application of `20260507040000_itinerary_day_editing.sql`.
+
+## UAT Schema Compatibility Fix
+
+- Observed user-facing failure: Supabase returned `Could not find the 'budget_amount' column of 'trips' in the schema cache` after a valid `/trips/new` submission.
+- Root cause: the connected Supabase project has the basic trip schema but is missing the Lane B global-planning migrations.
+- Fix verification: `npm run lint` PASS.
+- Fix verification: `npm run typecheck` PASS.
+- Fix verification: `npm run build` PASS.
+- Expected behavior before Lane B migrations: basic trip creation and edit fall back to saving country, total days, and city allocation; dates, budget, currency, language, notes, and itinerary still require the migrations for persistence.

@@ -6,10 +6,65 @@ import { redirect } from "next/navigation";
 import { type ActionState } from "@/lib/action-state";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { getString, parseTripDraftForm } from "@/lib/trip-draft-input";
+import {
+  type TripDraftInput,
+  getString,
+  parseTripDraftForm,
+} from "@/lib/trip-draft-input";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function isSchemaBehindError(message?: string) {
+  return Boolean(
+    message &&
+      (message.includes("schema cache") ||
+        message.includes("Could not find") ||
+        message.includes("function") ||
+        message.includes("column")),
+  );
+}
+
+async function updateBasicTrip(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  tripId: string,
+  userId: string,
+  input: TripDraftInput,
+) {
+  const { error: tripError } = await supabase
+    .from("trips")
+    .update({
+      country_name: input.countryName,
+      total_days: input.totalDays,
+    })
+    .eq("id", tripId)
+    .eq("user_id", userId);
+
+  if (tripError) {
+    return tripError;
+  }
+
+  const { error: deleteError } = await supabase
+    .from("trip_cities")
+    .delete()
+    .eq("trip_id", tripId)
+    .eq("user_id", userId);
+
+  if (deleteError) {
+    return deleteError;
+  }
+
+  const cityRows = input.cityRows.map((city) => ({
+    trip_id: tripId,
+    user_id: userId,
+    city_name: city.cityName,
+    days_in_city: city.daysInCity,
+    sort_order: city.sortOrder,
+  }));
+
+  const { error: cityError } = await supabase.from("trip_cities").insert(cityRows);
+  return cityError;
+}
 
 export async function updateTripDraftAction(
   _previousState: ActionState,
@@ -42,7 +97,8 @@ export async function updateTripDraftAction(
     })
     .eq("id", user.id);
 
-  const { error } = await supabase.rpc("update_trip_draft", {
+  let savedWithLimitedSchema = false;
+  let { error } = await supabase.rpc("update_trip_draft", {
     p_trip_id: tripId,
     p_country_name: input.countryName,
     p_total_days: input.totalDays,
@@ -57,6 +113,11 @@ export async function updateTripDraftAction(
     p_days_in_city: input.cityRows.map((city) => city.daysInCity),
   });
 
+  if (error && isSchemaBehindError(error.message)) {
+    error = await updateBasicTrip(supabase, tripId, user.id, input);
+    savedWithLimitedSchema = true;
+  }
+
   if (error) {
     return {
       status: "error",
@@ -68,5 +129,7 @@ export async function updateTripDraftAction(
 
   revalidatePath("/dashboard");
   revalidatePath(`/trips/${tripId}`);
-  redirect(`/trips/${tripId}?updated=1`);
+  redirect(
+    `/trips/${tripId}?updated=1${savedWithLimitedSchema ? "&limited=1" : ""}`,
+  );
 }

@@ -21,5 +21,9 @@
 ## Closed
 
 - Severity: High
+  - Issue: Valid `/trips/new` submissions failed when the connected Supabase project was missing Lane B columns such as `budget_amount`.
+  - Resolution: Added schema compatibility fallbacks so basic trip creation/editing and trip reads work against the Phase 1 schema while Lane B migrations are pending.
+
+- Severity: High
   - Issue: The starter repo referenced `@/lib/supabase/proxy` but did not contain that file.
   - Resolution: Added the Supabase Proxy helper and supporting server/browser clients.

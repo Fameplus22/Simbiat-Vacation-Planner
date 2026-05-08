@@ -39,6 +39,7 @@ export default async function TripDetailPage({
   const query = await searchParams;
   const wasCreated = query?.created === "1";
   const wasUpdated = query?.updated === "1";
+  const savedWithLimitedSchema = query?.limited === "1";
   const { trip, error } = await getTripForUser(id, user.id);
 
   return (
@@ -97,6 +98,14 @@ export default async function TripDetailPage({
           <div className="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
             Draft trip updated. The dashboard and detail view now reflect the
             latest plan.
+          </div>
+        ) : null}
+
+        {savedWithLimitedSchema ? (
+          <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+            Trip saved with the current basic Supabase schema. Apply the Lane B
+            migrations to persist dates, traveler count, budget, currency,
+            language, notes, and itinerary details.
           </div>
         ) : null}
 

@@ -2,6 +2,11 @@ import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
+const FULL_TRIP_SELECT =
+  "id,country_name,total_days,starts_on,ends_on,traveler_count,budget_amount,currency_code,planning_locale,notes,status,created_at,updated_at,trip_cities(id,city_name,days_in_city,sort_order)";
+const BASIC_TRIP_SELECT =
+  "id,country_name,total_days,status,created_at,updated_at,trip_cities(id,city_name,days_in_city,sort_order)";
+
 export type TripCitySummary = {
   id: string;
   city_name: string;
@@ -26,40 +31,90 @@ export type TripSummary = {
   trip_cities: TripCitySummary[];
 };
 
+function isSchemaBehindError(message: string) {
+  return (
+    message.includes("schema cache") ||
+    message.includes("Could not find") ||
+    message.includes("column") ||
+    message.includes("relationship")
+  );
+}
+
+function normalizeTrip(trip: Partial<TripSummary>): TripSummary {
+  return {
+    id: trip.id ?? "",
+    country_name: trip.country_name ?? "Trip",
+    total_days: trip.total_days ?? 1,
+    starts_on: trip.starts_on ?? null,
+    ends_on: trip.ends_on ?? null,
+    traveler_count: trip.traveler_count ?? 1,
+    budget_amount: trip.budget_amount ?? null,
+    currency_code: trip.currency_code ?? "USD",
+    planning_locale: trip.planning_locale ?? "en",
+    notes: trip.notes ?? null,
+    status: trip.status ?? "draft",
+    created_at: trip.created_at ?? "",
+    updated_at: trip.updated_at ?? "",
+    trip_cities: [...(trip.trip_cities ?? [])].sort(
+      (a, b) => a.sort_order - b.sort_order,
+    ),
+  };
+}
+
 export async function listTripsForUser(userId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const fullResult = await supabase
     .from("trips")
-    .select(
-      "id,country_name,total_days,starts_on,ends_on,traveler_count,budget_amount,currency_code,planning_locale,notes,status,created_at,updated_at,trip_cities(id,city_name,days_in_city,sort_order)",
-    )
+    .select(FULL_TRIP_SELECT)
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
+
+  let data: unknown = fullResult.data;
+  let error = fullResult.error;
+
+  if (error && isSchemaBehindError(error.message)) {
+    const basicResult = await supabase
+      .from("trips")
+      .select(BASIC_TRIP_SELECT)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    data = basicResult.data;
+    error = basicResult.error;
+  }
 
   if (error) {
     return { trips: [], error: error.message };
   }
 
-  const trips = ((data ?? []) as TripSummary[]).map((trip) => ({
-    ...trip,
-    trip_cities: [...(trip.trip_cities ?? [])].sort(
-      (a, b) => a.sort_order - b.sort_order,
-    ),
-  }));
+  const trips = ((data ?? []) as Partial<TripSummary>[]).map(normalizeTrip);
 
   return { trips, error: null };
 }
 
 export async function getTripForUser(tripId: string, userId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const fullResult = await supabase
     .from("trips")
-    .select(
-      "id,country_name,total_days,starts_on,ends_on,traveler_count,budget_amount,currency_code,planning_locale,notes,status,created_at,updated_at,trip_cities(id,city_name,days_in_city,sort_order)",
-    )
+    .select(FULL_TRIP_SELECT)
     .eq("id", tripId)
     .eq("user_id", userId)
     .maybeSingle();
+
+  let data: unknown = fullResult.data;
+  let error = fullResult.error;
+
+  if (error && isSchemaBehindError(error.message)) {
+    const basicResult = await supabase
+      .from("trips")
+      .select(BASIC_TRIP_SELECT)
+      .eq("id", tripId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    data = basicResult.data;
+    error = basicResult.error;
+  }
 
   if (error) {
     return { trip: null, error: error.message };
@@ -69,15 +124,8 @@ export async function getTripForUser(tripId: string, userId: string) {
     notFound();
   }
 
-  const trip = data as TripSummary;
-
   return {
-    trip: {
-      ...trip,
-      trip_cities: [...(trip.trip_cities ?? [])].sort(
-        (a, b) => a.sort_order - b.sort_order,
-      ),
-    },
+    trip: normalizeTrip(data as Partial<TripSummary>),
     error: null,
   };
 }
